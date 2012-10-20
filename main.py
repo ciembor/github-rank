@@ -1,16 +1,26 @@
-try:
-  import config
-except Exception:
-  print("Can't load config.py")
-  sys.exit(1)
-try:
-  import auth
-except Exception:
-  print("Warning: can't load auth.py")
+# -*- coding: utf-8 -*-
 
-locations = ['Krakow', 'Kraków', 'Cracow']
-usernames = getUsernames(locations)
-users = getTop(usernames, 10)['users']
-users = sorted(users, key=lambda k: k['stars'])
-for user in users:
-	print(user['login'] + '			' + str(user['stars'])) 
+from functions import *
+from github import Github
+import os
+import shutil
+
+import config
+import auth
+
+gh = Github(auth.oauth)
+
+try:
+  if not os.path.exists('./cache'):
+    os.makedirs('./cache')
+except:
+  raise
+  
+for location in config.locations:
+  if not os.path.exists('./cache/' + location + '.md'):
+    usernames = getUsernames(config.locations[location], gh)
+    top = getTop(usernames, config.result_size, gh)
+    updateTop(top, location, config.locations[location], config.db_path, './cache')
+
+shutil.copy('./cache', config.output_path)
+shutil.rmdir('./cache')

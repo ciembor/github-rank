@@ -1,1 +1,6 @@
 auth.py
+db
+output
+cache
+*.pyc
+__pycache__
